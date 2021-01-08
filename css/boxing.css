@@ -1,0 +1,66 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+.box1 {
+    width: 100px;
+    height: 100px;
+    border: 5px solid red;
+    background-color: pink;
+    box-sizing: border-box;
+}
+.box2 {
+    width: 120px;
+    height: 120px;
+    border: 5px solid rgb(224, 135, 135);
+    background-color: plum;
+    box-sizing: content-box;
+}
+
+/* 父子元素边界重叠，在父元素上设置overflow: hidden，使其成为BFC */
+.father {
+    background-color: green;
+    /* 设置overflow: hidden就可以解决外边距坍塌的问题，此时.father的高度是110px,不设置就是100px */
+    overflow: hidden;
+}
+.child {
+    width: 100px;
+    height: 100px;
+    margin-top: 10px;
+    background-color: yellow;
+}
+
+/* 兄弟元素的边界重叠，在中间子元素创建一个BFC */
+.dv1 {
+    background-color: red;
+    overflow: hidden;
+}
+.dv1 p {
+    margin: 10px auto 20px;
+    background-color: pink;
+}
+
+.dv2 {
+    background-color: purple;
+}
+.dv2>.left {
+    width: 100px;
+    height: 100px;
+    background-color: blue;
+    float: left;
+}
+.dv2>.right {
+    height: 110px;
+    /* 给right设置overflow会给left留出width: 100px的宽度 */
+    /* 给右侧元素创建一个BFC，原理是BFC不会与float元素发生重叠 */
+    overflow: hidden;
+    background-color: #ccc;
+}
+
+.dv3 {
+    background-color: #4ea;
+}
+.dv3 p {
+    background-color: pink;
+    float: left;
+}
