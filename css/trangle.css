@@ -1,0 +1,67 @@
+.trangle {
+    width: 0;
+    height: 0;
+    border-left: 50px solid red;
+    border-right: 50px solid pink;
+    border-top: 50px solid blueviolet;
+    border-bottom: 50px solid burlywood;
+}
+.tr0 {
+    overflow: auto;
+}
+/* transparent，背景透明，可实现单个三角形 */
+.tr1 {
+    width: 0;
+    height: 0;
+    border: 50px solid transparent;
+    border-bottom: 50px solid burlywood;
+    float: left;
+}
+.tr2 {
+    width: 0;
+    height: 0;
+    border: 50px solid transparent;
+    border-top: 50px solid blueviolet;
+    float: left;
+}
+.tr3 {
+    width: 0;
+    height: 0;
+    border: 50px solid transparent;
+    border-left: 50px solid red;
+    float: left;
+}
+.tr4 {
+    width: 0;
+    height: 0;
+    border: 50px solid transparent;
+    border-right: 50px solid pink;
+    float: left;
+}
+.tt0 {
+    display: flex;
+}
+.tt1 {
+    width: 100px;
+    height: 100px;
+    border: 20px solid transparent;
+    border-bottom: 20px solid yellow;
+}
+.tt2 {
+    width: 100px;
+    height: 50px;
+    border: 1px solid rgb(17, 172, 233);
+    transform: skewX(-20deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.text {
+    transform: skewX(20deg);
+}
+.tt3 {
+    width: 50px;
+    height: 50px;
+    background-color: red;
+    transform: rotate(45deg);
+}

@@ -57,8 +57,11 @@
     background-color: #ccc;
 }
 
+/* 由于子元素float导致父元素高度为0，这时应该给父元素一个BFC */
+/* BFC清除浮动 */
 .dv3 {
     background-color: #4ea;
+    overflow: auto;
 }
 .dv3 p {
     background-color: pink;
