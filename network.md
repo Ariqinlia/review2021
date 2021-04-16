@@ -57,7 +57,36 @@ post是根据报文主体来对指定资源做出处理，post不安全，不幂
 - 将缓存信息中的Etag和last-modified通过请求发送给服务器，服务区校验返回304，浏览器就可以直接使用缓存
 简言之：强缓存只要有有效的数据，就不用再去请求服务器；协商缓存不管是否有效，都要去请求服务器，如果失效了就直接返回最新的缓存数据和规则，反之，客户端就去缓存数据库中获取数据。
 
-# 跨域??
+# 跨域（非同源策略请求）
+协议，域名和端口号，三个都相同是同源策略，只要有一个不同就是跨域
+- 同源策略请求：ajax / fetch
+- 跨域传输
+[JSONP]：script,img,link,iframe不存在跨域的限制。
+- 客户端向服务器发送请求，同时会把本地的一个函数传递给服务器
+- 服务器接收到请求，拿到callback，先准备JSON格式的数据data={...}，再给客户端返回数据"func(JSON.stringify(data))"
+- 只能用get请求
+[CORS跨域资源共享]：需要浏览器和服务端同时支持，实现CORS的关键是后端
+- 简单请求：
+（1）请求方法为其一：HEAD、GET、POST
+（2）HTTP的请求头信息不超出以下几种字段：
+- Accept
+- Accept-Language
+- Content-Language
+- Last-Event-ID
+- Content-Type：只限于application/x-www-form-urlencoded、multipart/form-data、text/plain
+（3）后端的响应头信息：
+- Access-Control-Allow-Origin：必选，它的值要么是请求时Origin字段的值，要么是一个*，表示接受任意域名的请求。
+- Access-Control-Allow-Credentials：可选，它的值是一个布尔值，表示是否允许发送Cookie。
+- Access-Control-Expose-Headers：可选，CORS请求时，XMLHttpRequest对象的getResponseHeader()方法只能拿到6个基本字段：Cache-Control、Content-Language、Content-Type、Expires、Last-Modified、Pragma。如果想拿到其他字段，就必须在Access-Control-Expose-Headers里面指定。
+- 非简单请求(复杂请求)：不符合以上条件就是复杂请求。复杂的CORS请求，会在正式通信之前，增加一次HTTP查询请求，称为[预检]请求，OPTION请求不做任何处理
+- 客户端发送Ajax/fetch请求
+- 服务器端设置相关的头信息
+- Access-Control-Request-Method：该字段是必须的，用来列出浏览器的CORS请求会用到哪些HTTP方法。
+- Access-Control-Request-Headers：该字段是一个逗号分隔的字符串，指定浏览器CORS请求会额外发送的头信息字段。
+[proxy]：webpack-dev-server中的proxy，设置代理
+[Ngnix反向代理]：
+[postMessage]：
+[WebSocket]：是一种双向通信协议，在建立连接之后，WebSocket的server与client都能主动向对方发送或接收数据
 
 # 浏览器渲染过程
 - 解析HTML生成DOM树
@@ -77,8 +106,21 @@ post是根据报文主体来对指定资源做出处理，post不安全，不幂
 ## 重绘(repaint)与回流(reflow)
 [重绘repaint]：屏幕的一部分变了，但不影响整体布局，元素的大小和位置没发生变化，这时就会触发重绘
 [回流reflow]：元素大小或者位置变了，需要重新验证并计算渲染树，就会触发回流
+---------------
+回流更消耗性能，回流一定会触发重绘，而重绘不一定会触发回流
+---------------
 display: none;不在文档流中占用空间，会触发回流
 visibility: hidden;属于隐藏属性，在文档流中占有位置，所以会触发重绘
+## 避免DOM的回流
+- 减少对DOM的操作，使用vue/react/angular，利用数据影响视图的模式来构建项目
+- 分离读写操作（现代浏览器的渲染队列机制）：遇到一个改变样式的代码，就放入渲染队列中，再执行下一段代码，如果依然是改变样式的，也放入渲染队列中，直到下一段代码不是改变样式的，然后将渲染队列中的所有代码拿出来渲染到页面上就，这时就只会触发一次回流，而老版本的浏览器就是只要改变了样式就立即回流
+- 样式集中改变：把样式先写好，再通过修改类来实现样式集中
+- 缓存布局信息：把要操作的内容一次拿到，用变量存储，要设置的时候直接拿到，避免多次获取
+- 元素批量修改：可以采用文档碎片的方法，把新创建的元素先放入一个变量中，等全部创建完毕再统一增加到页面中进行渲染
+- 脱离文档流：也会引起回流和重绘，只不过是脱离了文档流，重新计算的过程会比较快一点
+- CSS硬件加速（GPU加速）：比起减少回流和重绘，更期望的是不要回流重绘，transform/opacity/filters...这些属性会触发硬件加速，不会引发回流和重绘
+- 牺牲平滑度来换取速度
+- 避免table布局和使用CSS的JavaScript表达式
 
 # 浏览器中输入URL发生了什么
 - DNS域名解析，拿到对应的IP地址

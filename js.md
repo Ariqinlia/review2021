@@ -121,6 +121,11 @@ ie：设置[Event.returnValue]=[false]
 not ie: [Event.preventDefault]()
 
 # 什么是闭包 !!important -- curry柯里化函数
+执行上下文：全局环境和函数环境
+闭包可以在函数中访问到另外的函数作用域中的数据
+每次执行函数的时候都在内存中新开辟了一块空间
+this指向当前调用函数的对象，箭头函数this指向执行上下文
+内存泄漏解决方法，可直接将变量设置为null
 闭包可以读取到函数内部的变量，通过函数内部的函数实现，在这个函数内部中去访问函数内部的变量，并将其返回，就形成了闭包
 
 # 事件循环机制(event loop)
@@ -181,7 +186,7 @@ commonJS、CMD和sea.js、AMD和require.js、ES6 Module
  - - 编译时加载：ES6模块不是对象，而是通过export命令显式指定输出的代码，import采用的静态命令的方式。即在import时可以指定加载某个输出值，而不是加载整个模块
 
 # ES6新增特性
-[const和let]：const声明一个只读的常量，一旦声明就不能被改变，如果是引用类型，则是引用的地址不能改变，所哟声明时必须赋值；
+[const和let]：都是块级作用域。const声明一个只读的常量，一旦声明就不能被改变，如果是引用类型，则是引用的地址不能改变，所以声明时必须赋值；
               let声明的变量只在当前作用域中有效，不能变量提升，不允许重复声明
 [解构赋值]：按照一定模式从数组或对象中提取值，然后对变量进行赋值（先提取，再赋值）
 - 数组：let [a,b]=[1,2] // a=1,b=2
@@ -217,7 +222,7 @@ commonJS、CMD和sea.js、AMD和require.js、ES6 Module
            Object.assign(target,source),将源对象中的枚举属性复制到目标对象中。
 - Null传导运算符(?.)
   <const firstname = (msg&&msg.name)> ==> <const firstname = msg?.name>
-[Symbol]：ES6新增Symbol数据类型，用于唯一值
+[Symbol]：ES6新增Symbol数据类型，表示独一无二的值
 [Set、Map数据结构]：
 - Set,类似于数组，但成员的值都是唯一的，没有重复，本身是构造函数。
   add(value),delete(value),has(value),clear()
@@ -225,6 +230,76 @@ commonJS、CMD和sea.js、AMD和require.js、ES6 Module
            [...new Set([1,1,1,2,3,4])]
 - Map,类似于数组，是键值对的集合，解决了js的对象只能用字符串作为键的问题。使用set(),get(),delete(),clear(),增，查，删，清空
 [Promise]：是异步编程的一种解决方案。
+## 特点
+- 状态不受外界影响。有三种状态：padding,fulfilled,rejected
+- 一旦状态改变就不会再变
+## 用法 refer to promise.js
+new Promise((resolve,reject) => {}).then(res => {}, err => {}).catch().finally()
+- <then()>: Promise实例具有then(),是定义在原型对象Promise.prototype上的。then()返回的是一个新的Promise实例，所以可以采用链式写法
+- <catch()>: 捕获发生错误或者异常的回调
+- <finally()>: 不管promise对象最后的状态是什么都会执行的操作
+- <all()>: 将多个Promise实例，包装成一个新的Promise实例。在all()中可以传递多个Promise对象，当所有实例对象的状态都是fulfilled,就返回fulfilled,否则返回rejected
+- <race()>: 将多个promise实例，包装成一个新的promise实例。传递多个promise对象，如果在这些实例中有一个先改变了状态，那么race的状态就会变
+[Iterator]：其实就是Symbol内置属性Symbol.iterator(),该方法会返回一个Iterator对象，包含一个next(),调用之后会返回一个迭代器结果对象iteratorResult,这个对象包含两个值：
+            value为遍历的item，done为当前数据是否遍历完成。 
+            {value: item, done: true/false}
+- 为各种数据提供统一的，简便的访问接口
+- 使数据结构的成员能按某种次序排列
+- 主要供for...of使用
+原生有iterator的数据结构：Array,Map,Set,某些类似数组的对象(String,arguments,Nodelist etc)
+- 解构赋值：对数组和Set结构进行解构赋值时，会默认调用Symbol.iterator
+            <let set = new Set().add('a').add('b').add('c')>
+            <let [x,y] = set> ==> x='a',y='b'
+            <let [first,...rest] = set> ==> first='a', rest=['b','c']
+- 扩展运算符：只要某个数据结构部署了Iterator接口，就可以使用扩展运算符，转为数组。
+             一个数据结构只要具有[Symbol.iterator]属性就认为是[可遍历的]
+- yield*
+- 其他场合： for...of,Array.from().Map(),Set(),WeakMap(),WeakSet(),Promise.all(),Promise.race()
+            由于数组的遍历会调用遍历器接口，所以任何接受数组作为参数的场合，都调用了。
+## for...of 和for...in
+- for...of: 可以遍历获得键值value，但是数组的遍历只会返回具有数字索引的属性，不能遍历普通对象，可通过Object.keys搭配使用
+- for...in: 只能获得对象的键名key，以字符串的形式，不饿能直接获取键值，也就是说用for...in循环数组，得到的键名是字符串
+<let arr = [1,3,5]; arr.foo = 'a'>
+<for(let i in arr) {console.log(i); console.log(typeof i)}> // 0,1,2,'a' string
+<for(let i of arr) {console.log(i); console.log(typeof i)}> // 1,3,5 number
+
+[Generator]：是es6提供的一种异步编程解决方案。Generator函数是一个普通函数，有两个特征：
+             1.function关键字与函数名之间有一个*。function* funName() {}
+             2.内部使用yield语句，定义不同的状态
+- 遇到yield语句，暂停执行后面的操作，并将yield后面的值作为返回value的值
+- 直到return语句，将return后面的值作为返回对象的属性值
+- 如果没有return语句，value为undefined
+- Genertor函数可以不用yield语句，这时就变成了一个单纯的暂缓执行函数
+- yield语句不能用在普通函数中，会报错
+- next()的参数：yield本身没有返回值，或者说总是返回undefined
+               next()可以带一个参数，该参数会被当做上一个yield语句的返回值
+- for...of可以自动遍历Generator函数生成的Iterator对象，不需要调用next()，一旦next()返回对象的done为true，for...of循环会中止
+    function* foo() { yield 1; yield2; yield3; return 4; }
+    for(let v of foo()) { console.log(v) } // 1,2,3
+## 在ES2017中提出了async await,是Generator的语法糖
+用法：async function a() {
+            await something;
+            do something
+            await ...
+     }
+- 执行a()时不会阻塞函数外面的代码，a()中代码会按顺序执行
+[class]：ES5没有类的概念
+ES5定义一个类
+function Point(x,y) { this.x=x; this.y=y; } let p = new Point(1,2)
+ES6定义一个类
+class Point { constructor(x,y) { this.x=x; this.y=y; } } let p = new Point(1,2)
+- constructor()是类的默认方法，通过new命令生成对象时会调用此方法，如果声明类时没有定义，会默认定义一个空的
+- 生成实例必须用new，不然会报错
+- 不存在变量提升(先定义类，再生成实例)
+## 类的静态方法
+所有在类中定义的方法都会被实例继承，如果不想被继承，可以在定义时加上static，表示为静态方法
+## 类的静态属性
+ES6中并没有给类设置静态属性，但可以定义,类名.属性名
+class Foo {}
+Foo.prop = 1;
+## class继承 extends
+[Module]：[ES6Module]
+[Proxy]：用于修改某些操作的默认行为，在目标对象之前设一层拦截，可以对外界的访问进行过滤和改写
 
  # 防抖和节流
  [防抖]：触发高频事件后n秒内函数只会执行一次，如果n秒内高频事件再次被触发，则重新计算时间。

@@ -20,3 +20,24 @@ newObj.play.game = 'lol'
 console.log(obj,newObj)
 // {name: 'rose', play: {game: 'bob', music: 'save and sound'}}
 // {name: 'rose', play: {game: 'lol', music: 'save and sound'}}
+
+/*
+ * JSON.parse(JSON.stringify(obj))有缺陷
+ * 1.对于bigint会直接报错
+ * 2.symbol,function,undefined,会直接返回空对象
+ * 3.正则和date,不能正确的显示
+ *
+ */
+function _deepCopy(obj) {
+    let result = new obj.constructor();
+    // 对数据类型进行判断
+    if(obj===null) return null;
+    if(typeof obj !== 'object') return obj
+    if(obj instanceof RegExp) return obj;
+    if(obj instanceof Date) return obj;
+    // 数组和对象再次深拷贝
+    Object.keys(obj).forEach(key => {
+        result[key] = _deepCopy(obj);
+    })
+    return result;
+}
