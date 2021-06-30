@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,59 @@
     <link rel="stylesheet" href="./css/boxing.css">
     <title>Document</title>
 </head>
+<style>
+    #test {
+        background-color: rgb(146, 194, 196);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    div>span {
+        font-size: 5em;
+        text-transform: uppercase;
+    }
+
+    .color {
+        animation: color 1s linear 2 alternate;
+    }
+
+    @keyframes color {
+        50% {
+            transform: scale(2);
+        }
+
+        100% {
+            transform: scale(.5);
+        }
+    }
+
+    .divs {
+        width: 300px;
+        height: 100px;
+        border: 1px solid #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .left {
+        flex: 1
+    }
+
+    .right {
+        flex: 1
+    }
+
+    ul li {
+        list-style: none;
+    }
+
+    a {
+        text-decoration: none;
+    }
+</style>
+
 <body>
     <div class="box1">
         我是ie盒模型
@@ -30,13 +84,77 @@
     <div class="dv3">
         <p>我是浮动元素</p>
     </div>
-    <input type="text" value="test" id="testDebounce"/>
+    <input type="text" value="test" id="testDebounce" />
     <textarea name="" id="" cols="30" rows="10">er</textarea>
-    <button id="btn" >点我</button>
+    <button id="btn">点我</button>
+    <div id="test">just test</div>
+    <div class="divs">
+        <div class="left">
+            <ul>
+                <li><span>js</span><a href="javascript:;">+</a></li>
+                <li><span>css</span><a href="javascript:;">+</a></li>
+                <li><span>html</span><a href="javascript:;">+</a></li>
+            </ul>
+        </div>
+        <div class="right">
+            <p></p>
+            <span></span>
+        </div>
+    </div>
     <!-- <script src="./getWidthAndHeight.js"></script> -->
     <!-- <script src="./debounce.js"></script> -->
-    <!-- <script src="./extends.js"></script> -->
+    <script src="./extends.js"></script>
     <!-- <script src="./promise.js"></script> -->
-    <script src="./call&apply&bind.js"></script>
+    <!-- <script src="./call&apply&bind.js"></script> -->
+    <!-- <script src="./throttle.js"></script> -->
+    <!-- <script src="./subscribe.js"></script> -->
+    <!-- <script src="./random.js"></script> -->
+    <script src="./deepCopy.js"></script>
+    <script>
+        const div = document.getElementById('test')
+        console.log([...div.textContent]);
+        [...div.textContent].reduce((pre, cur, index) => {
+            pre === index && (div.textContent = '');
+            const span = document.createElement('span')
+            span.innerHTML = cur
+            div.appendChild(span)
+            span.addEventListener('mouseenter', function () {
+                this.classList.add('color')
+            })
+            // 移除动画
+            span.addEventListener('animationend', function () {
+                this.classList.remove('color')
+            })
+        }, 0)
+
+        const lis = document.querySelectorAll('li');
+        const pp = document.querySelector('.right>p')
+        const spans = document.querySelector('.right>span')
+        let map = new Map();
+        console.log(lis)
+        lis.forEach(li => {
+            const aa = li.querySelector('a');
+            const span = li.querySelector('span')
+            aa.addEventListener('click', function () {
+                this.innerHTML = this.innerHTML === '-' ? '+' : '-';
+                this.setAttribute('select', true)
+                map.set(span, {
+                    text: span.innerHTML,
+                    selected: this.innerHTML
+                })
+                console.log(map)
+                // count()
+                pp.innerHTML = `有${count().length}个被选中`
+                spans.innerHTML = count()
+            })
+        })
+        function count() {
+            return [...map].map(([key, value]) => {
+                const tt = value.selected === '-' ? value.text : ''
+                return tt
+            }).filter(v => v != '')
+        }
+    </script>
 </body>
+
 </html>

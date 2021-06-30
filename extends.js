@@ -121,8 +121,11 @@ function Child6(name,age,sex) {
     this.sex = sex || '女';
 }
 inheritPrototype(Child6,Parent6);
+Child6.prototype.show = function() {
+    console.log('shssss')
+}
 const cd6 = new Child6('XIN',24);
-cd6.sayName()
+cd6.show()
 cd6.list.push('cd6');
 const cd66 = new Child6('XIN2',25);
 console.log('cd6',cd6);

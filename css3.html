@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .box {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .box>img {
+        height: 100px;
+    }
+
+    .box:hover {
+        animation: rotate 1s;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .line {
+        border: 1px solid black;
+    }
+
+    .line1 {
+        border: 1px solid black;
+        transform: scaleY(0.5);
+    }
+
+    .line2 {
+        height: 1px;
+        background: -webkit-linear-gradient(90deg, #000 50%, transparent 50%);
+    }
+
+    .line3 {
+        width: 100px;
+        height: 100px;
+        position: relative;
+    }
+
+    .line3::before {
+        content: ' ';
+        position: absolute;
+        width: 100%;
+        bottom: 0;
+        height: 1px;
+        background-image: linear-gradient(to bottom, transparent 50%, red 50%);
+    }
+
+    .coin {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: pink;
+        transform-style: preserve-3d;
+        animation: rot 3s linear infinite;
+    }
+
+    .coin:hover {
+        animation-play-state: paused;
+    }
+
+    @keyframes rot {
+        from {
+            transform: rotateY(0deg)
+        }
+
+        to {
+            transform: rotateY(360deg)
+        }
+    } 
+    .box1 {
+        width: 100px;
+        height: 100px;
+        transform-style: preserve-3d;
+        position: relative;
+        animation: rot 3s linear infinite;
+    }
+
+    .box1 > div {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        position: absolute;
+    }
+
+    .front {
+        background-color: #03a9f4;
+        transform: translateZ(15px);
+    }
+
+    .middle {
+        background-color: #8ef0ae;
+        transform: translateZ(7px);
+    }
+
+    .back {
+        background-color: #f06292;
+    }
+    .header {
+        width: 100%;
+        height: 100px;
+        background-color: pink;
+    }
+    .main {
+        overflow: hidden;
+        padding: 0 300px 0 200px;
+    }
+    .center {
+        width: 100%;
+        background-color: green;
+        height: 300px;
+        float: left;
+    }
+    .inner {
+        margin: 0 300px 0 200px;
+    }
+    .left {
+        width: 200px;
+        height: 300px;
+        background-color: blue;
+        float: left;
+        margin-left: -100%;
+        position: absolute;
+        left: 200px;
+    }
+    .right {
+        width: 300px;
+        height: 300px;
+        background-color: yellow;
+        float: left;
+        margin-left: -300px;
+        position: absolute;
+        right: 300px;
+    }
+    .footer {
+        width: 100%;
+        height: 100px;
+        background-color: pink;
+    }
+</style>
+
+<body>
+    <p>使用css实现一个动画，在鼠标hover上去之后，1s内头像旋转360度。头像宽高100，头像图片路径时当前路径下的image.png(300*400),要求头像居中完整显示</p>
+    <div class="box">
+        <img src="./11.png" alt="">
+    </div>
+    <p>如何画一条0.5px的线</p>
+    <div class="line"></div>
+    <p>1.使用transform:scale</p>
+    <div class="line1"></div>
+    <p>2.使用渐变</p>
+    <div class="line2"></div>
+    <div class="line3"></div>
+    <p>3.使用viewport：initial-scale=0.5 ----- 只适用于移动端</p>
+    <!-- 这是正常的1px线条 -->
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <!-- 0.5px线条 -->
+    <meta name="viewport" content="width=device-width,initial-scale=0.5,user-scalable=0">
+    实现一个硬币旋转的效果
+    <div class="coin"></div>
+    <div class="box1">
+        <div class="front"></div>
+        <div class="middle"></div>
+        <div class="back"></div>
+    </div>
+    <div class="header">header</div>
+    <div class="main">
+        <!-- 圣杯布局 -->
+        <div class="center">自适应</div>
+        <!-- 双飞翼布局 -->
+        <!-- <div class="center">
+            <div class="inner">自适应</div>
+        </div> -->
+        <div class="left">left</div>
+        <div class="right">right</div>
+    </div>
+    <div class="footer">footer</div>
+</body>
+
+</html>
