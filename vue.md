@@ -367,5 +367,56 @@ vue实现响应式并不是在数据发生后立即更新DOM，使用vm.$nextTic
 异步请求可以在created和mounted生命周期中调用，对于异步请求不操作dom或者依赖dom的时候，这两种生命钩子函数没有区别。
 只有当要操作dom或者要依赖dom的时候，就在mounted中调用
 
+# vue的过滤器
+可以使用过滤器来处理通用文本，比如时间格式，文本格式等
+[本地过滤器]：可以在组件中定义属于组件的过滤器，通过[filters]属性来定义
+            filters: {
+                xxxFn(value) { return another }
+            }
+但是在vue3中过滤器已经被删除，建议使用方法调用和计算属性去替换过滤器。
+----------------
+[全局过滤器]：如果在应用中全局注册了过滤器，那么在每个组件中用计算属性或方法调用来替换可能就没那么方便了，这时我们可以使用[全局属性]在所有组件中使用它
+            app.config.globalProperties.$filters = { something need to filters }
+            然后就可以通过[$filters]对象修改所有的模板
+            like this: <p>{{ $filters.currencyUSD(accountBalance) }}</p>
 
+# vue自定义指令
+[局部指令]：在组件可以定义局部指令，通过[directives]
+            directives：{
+                defineName: {}
+            }
+[全局指令]：使用Vue.directive(defineName,{ code for directive })
+[指令的钩子函数]：一个指令定义对象可以提供如下几个钩子函数(均为可选)
+                [bind]：只调用一次，指令第一次绑定到元素时调用，在这里可以进行一次性的初始化设置
+                [inserted]：被绑定元素插入父节点时调用(仅保证父节点存在，但不一定已被插入文档中)
+                [update]：所在组件的vnode更新时调用，但是可能发生在其子节点vnode更新之前。指令的值可能发生了改变，也可能没有。可以通过比较更新前后的值来忽略不必要的模板更新
+                [componentUpdated]：指令所在组件的vnode及其子组件vnode全部更新后调用
+                [unbind]：只调用一次，指令与元素解绑时调用
+[钩子函数的参数]：el,binding,vnode,oldVnode
+                指令钩子函数会被传入以下参数：
+                el: 指令所绑定的元素，可以用来直接操作DOM
+                binding：一个对象，包含以下属性：
+                        name: 指令名，不包括v-
+                        value: 指令的绑定值
+                        oldValue: 指令绑定的前一个值，仅在update和componentUpdated钩子中可用
+                        expression：字符串形式的指令表达式
+                        arg：传给指令的参数，例如v-my-directive:foo 中，参数为 "foo"
+                        modifiers：一个包含修饰符的对象
+                vnode：Vue编译生成的虚拟节点
+                oldVnode：上一个虚拟节点
+[动态指令参数]：指令的参数可以是动态的
+                v-mydirective:[argument]="value"
 
+# vue中为什么对数组不能劫持
+（1）通过下标改变数组，vue无法监听
+（2）通过修改数组length去操作数组，vue无法监听
+（3）vue中对数组操作需要使用变异方法。push,unshift,pop,shift,sort,reverse,splice
+（4）数组中的对象发生变化，是可以被监听的。比如arr[1].a = 1
+（5）直接替换数组，可以被监听
+在vue对data进行监听的时候，发现需要监听的对象是个数组，那么就不能用defineProperty来对数据进行监听了。
+如果是数组，就需要对数组的原方法进行重写。
+如果变异方法中，对数组添加对象，这里面的对象是没有被监听的，那么应该怎么处理呢？
+定义了一个inserted变量，七个变异方法中，只有push,unshift,splice可以向数组插入值，如果监听到数组被插入数据，即inserted有值，则对inserted进行循环，然后对每一项进行监听
+--------------
+vue为什么对数组index的修改和lenght修改不做监听呢？
+当数组项非常大的时候，操作下标或length会有严重的性能问题
