@@ -323,7 +323,20 @@ stateObject：当浏览器跳转到新的状态时，将触发popState事件，�
 数据驱动(双向数据绑定)和组件化
 
 # vue中key值的作用
-使用key来给每个节点做一个唯一标识。key的作用主要是为了高效的更新虚拟DOM
+使用key来给每个节点做一个唯一标识。key的作用主要是为了高效的更新虚拟DOM。
+
+如果都不写key的话，新生成的vnode和旧的vnode不匹配，就会直接销毁再创建新的，如果有key的话，只需要找到新的key和哪个旧的key相匹配，匹配的旧的key就会移动到匹配位置，不用再做销毁处理，这也是key作为标识符的好处。所以必须保证每个key是唯一的才能知道一个元素改变前后的位置，如果不是唯一的话，元素可能会移动到其他元素的位置而不是这个元素实际变化的位置。
+
+key不能是随机数，因为新老产生的随机数不一样，所以不能作为新老对比的标识；
+index也不能作为key，如果下标发生变化，如果是有排序功能的话，就会出现问题，最好使用业务中的key值，比如id，字符串等等
+
+# diff算法
+（1）只比较同一层级，不跨级比较
+（2）tag不相同，则直接删掉重建，不再深度比较
+（3）tag和key都相同，则认为是相同节点，通过比较新旧节点的细节上的不同，比如文本不一样，是否存在子节点来进行增加和删除以及修改
+
+# 模板编译
+vue通过template compiler将模板编译为render函数，执行render函数会生成vnode，如果模板更改了，会生成一个新的vnode，通过新旧vnode的diff，patch出所有需要变更的差异，然后应用到真实DOM上进行ui的更新
 
 # v-for与v-if的优先级
 v-for > v-if
@@ -358,7 +371,24 @@ v-for > v-if
 （3）兄弟组件之间传值：
     共同传值给父组件，再由父组件分发，即状态提升；
     使用vuex；
-    利用bus事件总线；
+    利用自定义事件进行vue组件通讯，利用bus事件总线（中央事件总线）：
+    eg: A组件中注册事件
+        mounted() {
+            event.$on('addTitle',this.handleAdd)
+        }
+        beforeDestroy() {
+            // 及时销毁，否则可能造成内存泄漏
+            event.$off('addTitle',this.handleAdd)
+        }
+        在B组件中触发事件
+        import event from './event.js'
+        add() {
+            // 在B组件中触发A组件事件，进行通信
+            event.$emit('addTitle',this.title)
+        }
+        // 创建event.js，其实就是创建一个vue实例
+        import Vue from 'vue'
+        export default new Vue()
 
 # $NextTick
 vue实现响应式并不是在数据发生后立即更新DOM，使用vm.$nextTic是在下次DOM更新循环结束之后立即执行延迟回调。在修改数据之后使用，则可以在回调中获取更新后的DOM
@@ -420,3 +450,84 @@ vue实现响应式并不是在数据发生后立即更新DOM，使用vm.$nextTic
 --------------
 vue为什么对数组index的修改和lenght修改不做监听呢？
 当数组项非常大的时候，操作下标或length会有严重的性能问题
+
+# Vue的高级特性
+[v-model]：
+[$nextTick]：Vue是异步渲染，data改变之后，Dom不会立即渲染，$nextTick会在DOM渲染之后被触发，以获取最新的DOM节点
+[refs]：
+[slot]：父组件想往子组件里面插入一些东西
+1.基本使用：从父组件向子组件添加内容，通过slot放到子组件指定位置。
+            场景：子组件是一个公共的组件，提供一些通用功能，父组件可以往里放一些自定义的展示功能
+2.作用域插槽：父组件通过slot获取子组件中的值
+             在子组件中通过自定义属性来绑定数据，父组件通过template的v-slot属性接收数据。
+             eg: 父组件：<Child>
+                            <template v-slot='slotProps'>{{slotProps.slot_info}}</template>
+                        </Child>
+                 子组件：<slot :slot_info='xxx'></slot>
+3.具名插槽：父组件中通过使用v-slot:slotName或者#slotName来定义slot的name，在子组件中通过<slot name='slotName'></slot>来获取内容
+4.默认插槽：父组件中没有定义slot name，按照默认顺序往子组件插内容的
+[动态、异步组件]：
+                动态组件：有时候会根据条件来决定挂载在页面上的是哪个组件
+                         用法 --> <component :is='componentName' />
+                异步组件：通过import实现异步加载组件，懒加载，用到的时候才会加载
+                         components：{ xxxComponent: () => import('组件路径') }
+[keep-alive]：会将组件生成的DOM缓存起来，不用再重新创建，重新渲染，下次创建的时候直接使用即可。
+              缓存组件，适用于频繁切换，不需要重复渲染，是vue常见的性能优化之一
+[​mixin]：多个组件有相同的逻辑，抽离出来
+        局部使用：mixins: [mixinName1,name2,name3...]
+        全局使用：Vue.mixin({ something logic })
+        mixin问题：1.变量来源不明确，不利于阅读；2.多个mixin可能会造成命名冲突；3.mixin和组件可能出现多对多的关系，复杂度较高
+
+# composition API和Options API
+在vue3中，Options API将beforeDestroy和Destroyed改为beforeUnmount和Unmount,仅仅是名字改变。
+composition API: 新增了setup()，此方法是用来代替beforeCreate和Created生命周期钩子, 在这个方法里写其余的钩子函数只是多加了on，仅仅是名字改变。
+composition API带来了什么？
+1.更好的代码组织
+2.更好的逻辑复用
+3.更好的类型推导
+如何选择composition API和Options API?
+1.不建议共用，会引起混乱
+2.小型项目、业务逻辑简单，用Options API
+3.中大型项目、逻辑复杂，用Composition API
+
+ ref: 1.可以用于值类型的响应式(最多的用法)。结合reactive()做响应式，在模板和reactive里用不用写.value，其他都需要写.value；2.还可以用于获取一个dom节点，eg: cons testRef = ref(null)
+
+toRef: 针对一个响应式对象(reactive({......data}))的prop；一个响应式对象中的某个属性要用toRef来实现属性的响应式；
+
+toRefs: 将响应式对象(reactive封装)转换为普通对象；对象的每个属性都是对应的ref;两者保持引用的关系
+
+toRef和toRefs的最佳使用方式：
+
+用reactive做对象的响应式，用ref做值类型的响应式；
+
+setup中返回toRefs(state) / toRef(state,'xxx');
+
+ref的变量命名都用xxxRef;
+
+合成函数返回响应式对象时，使用toRefs
+
+为何需要ref?
+
+vue3中实现数据劫持是通过proxy，proxy只能对对象实现响应式，不能对值类型实现响应式，
+
+为何需要.value?
+
+# 为何需要toRef和toRefs?
+在不丢失响应式的情况下，把对象数据分解、扩散；
+只适用于响应式对象
+注意：不创造响应式，而是延续响应式
+
+# vue3升级了哪些重要功能？
+(1)createApp:
+vue2.x: const app = new Vue({....})
+Vue.use(...) / Vue.component(...) etc.
+vue3: const ap = Vue.createApp({...})
+app.use(...) / app.component(...) etc.
+(2)emit:
+emits: ['...']
+setup(props,{emit}) { emit('onfuncName',msg) }
+
+# watch和watchEffect的区别
+watch：对于reactive对象，watch(() => state.xxx, (oldState,newState) => { .... }, { deep: true/false,immi... })
+       对于ref对象，watch(xxxRef,(old,new)=>{...},{...})
+watchEffect: watchEffect(() => {...}), 在回调函数里写了哪些变量，就会自动侦听这些变量，不需要手动指定，不过在初始化的时候，就会执行一次，因为要shouji侦听的数据

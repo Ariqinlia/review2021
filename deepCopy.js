@@ -14,9 +14,9 @@ function deepCopy(obj) {
 }
 
 // JSON.stringify()和JSON.parse()实现深拷贝,有一个缺点，该方法会自动忽略undefined、任意的函数、Symbol值，JSON不支持这些数据类型
-const obj = {name: 'rose', play: {game: 'bob', music: 'save and sound', blank: null}, date: new Date(), function() {console.log(111)}, key: Symbol('test')}
-const newObj = JSON.parse(JSON.stringify(obj))
-newObj.play.game = 'lol'
+// const obj = {name: 'rose', play: {game: 'bob', music: 'save and sound', blank: null}, date: new Date(), function() {console.log(111)}, key: Symbol('test')}
+// const newObj = JSON.parse(JSON.stringify(obj))
+// newObj.play.game = 'lol'
 // console.log(obj,newObj)
 // {name: 'rose', play: {game: 'bob', music: 'save and sound'}}
 // {name: 'rose', play: {game: 'lol', music: 'save and sound'}}
@@ -52,7 +52,27 @@ function copy(obj) {
     }
     return res
 }
-const nn = copy(obj)
-nn.play.game = 'lol'
-console.log(obj)
-console.log(nn)
+// const nn = copy(obj)
+// nn.play.game = 'lol'
+// console.log(obj)
+// console.log(nn)
+
+
+
+function convert(obj) {
+    const res = obj instanceof Array?[]:{}
+    for (const [k,v] of Object.entries(obj)) {
+        const keys = k.split('_').reduce((pre,cur) => {
+            const temp = cur.split('').map((item,ind) => {
+                return ind?item:item.toUpperCase()
+            }).join('')
+            return pre+temp
+        })
+        res[keys] = typeof v === 'object'?convert(v):v
+    }
+    return res
+}
+
+console.log('convert=====',convert({'a_bc_def':1}))
+console.log(convert({'a_bc_def': {'a_bc_def':2}}))
+console.log(convert({'a_bc_def': [{'a_bc_def':{'a_bc':3}}]}))

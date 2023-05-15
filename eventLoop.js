@@ -18,3 +18,31 @@ new Promise(resolve => {
     console.log('promise2')
 })
 console.log('script end')
+
+
+
+
+const treeData = {
+    root: ['xxx','yyy','aaa'],
+    xxx: ['xx1','xx2','xx3'],
+    yyy: ['yy1','yy2','yy3'],
+    aaa: ['a1','a2','a3'],
+    a1: ['aa1','aa2'],
+}
+print(treeData)
+// 结果如下
+root
+  xxx
+    xx1
+    xx2
+    xx3
+  yyy
+    yy1
+    yy2
+    yy3
+  aaa
+    a1
+      aa1
+      aa2
+    a2
+    a3

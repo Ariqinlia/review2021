@@ -53,6 +53,7 @@ console.log(p.m()); // 5
 检查对象是否存在自己定义的属性，必须用所有对象从Object.prototype继承的hasOwnPrototype()
 
 # 原型
+
 - 所有的对象都有__proto__属性，该属性对应的是该对象的原型prototype
 - 所有的函数对象都有prototype属性，该属性的值会赋值给通过该函数创建的对象的__proto__属性
 - 所有的原型对象都有constructor属性，该属性对应的是创建所有指向该原型的实例的构造函数
@@ -284,7 +285,7 @@ new Promise((resolve,reject) => {}).then(res => {}, err => {}).catch().finally()
     function* foo() { yield 1; yield2; yield3; return 4; }
     for(let v of foo()) { console.log(v) } // 1,2,3
 ## 在ES2017中提出了async await,是Generator的语法糖
-用法：async function a() {
+用法：async function a() {  
             await something;
             do something
             await ...
@@ -437,6 +438,13 @@ this指向是在运行时被创建的，不是定义的时候
 虚拟dom本质就是在js和真实dom之间做了个缓存
 
 # 基础数据类型和引用数据类型
+[基本数据类型]：number，string，Boolean，null，undefined，symbol，bigint。
+                这些类型可以直接操作保存在变量中的实际值
+[引用数据类型]：Object，在js中除了基本数据类型以外都是对象，array，function，正则, etc
+[栈]：自动分配的内存空间，由系统自动释放
+[堆]：是动态分配的内存，大小不一定，会自动释放
+基本数据类型是指存放在栈中的简单数据段，数据大小确定，内存空间大小可以分配，它们是直接按值存放的，所以可以直接按值访问；
+引用数据类型是存放在堆内存中的对象，变量其实是保存在栈内存中的一个指针（保存的是堆内存中的引用地址），这个指针指向堆内存
 
 # Object.freeze()
 可以使对象冻结，不再被修改
@@ -452,6 +460,61 @@ this指向是在运行时被创建的，不是定义的时候
               父节点入队，父节点出队列，先左子节点入队，后右子节点入队，递归遍历全部节点即可。
               BFS适用于大范围的寻找
 
+# 类上的属性和方法和原型上的属性和方法有什么区别
+1.把方法写在原型中比写在构造函数中消耗的内存更小，因为在内存中一个类的原型只有一个，写在原型中的行为可以被所有实例共享，实例化的时候并不会在实例的内存中再复制一份；而在类中的方法，实例化的时候会在每个实例中再复制一份，所以消耗的内存更高。
+所以没有特殊原因，一般把属性写在类中，而行为写在原型中
+2.构造函数定义的属性和方法要比原型中定义的属性和方法的优先级高，如果定义了同名称的属性和方法，构造函数中的将会覆盖原型中的
+
+# 一个字符串怎么会调用方法，比如'1'.toString()
+其实'1'.toString()，在这个语句运行过程中做了这样几件事情：
+- var s = new String('1'); 创建String类实例
+- s.toString(); 调用实例方法
+- s = null; 执行完方法立即销毁这个实例
+整个过程体现了[基本包装类型]的性质，而基本包装类型恰恰属于基本数据类型，包括Boolean，Number和String
+
+# 0.1+0.2为什么不等于0.3
+0.1和0.2在转换成二进制的时候会无限循环，由于标准位数的限制，后面多余的位数会被截掉，此时就已经出现了精度的损失，相加后因浮点数小数位的限制而截断的二进制数字在转换为十进制的时候，就会变成0.30000000000000004
+
+# instanceof能否判断基本数据类型
+instanceof是用来判断是否在其原型链上，本身是不能判断基本数据类型的，但是可以重写instanceof，在其内部用typeof改写
+
+# 手动实现instanceof的功能
+核心：原型链的向上查找
+function myInstance(left,right) {
+    // 如果是基本数据类型直接返回false
+    if(typeof left !== 'object' || left === null) return false;
+    // 获取原型
+    let proto = Object.getPrototypeOf(left)
+    while(true) {
+        // 如果proto是null，即原型链的终点，返回false
+        if(proto===null) return false;
+        // 如果找到了，返回true
+        if(protp===right) return true;
+        proto = Object.getPrototypeOf(proto)
+    }
+}
+
+# 对象转原始类型是根据什么流程运行的
+对象转原始类型，会调用内置的[toPrimitive]函数，对于该函数而言，其逻辑如下：
+1.如果有Symbol.toPrimitive()，优先调用再返回
+2.调用valueOf()，如果转换为原始类型，则返回
+3.调用toString()，如果转换为原始类型，则返回
+4.如果都没有返回原始类型，会报错
+
+# 如何让if(a==1&&a==2)成立
+var a = {
+    value: 0,
+    valueOf: function() {
+        this.value++;
+        return this.value;
+    }
+}
+其实就是对象转原始类型的应用
+
+# 关于类的一些总结
+（1）一个类中的构造函数不是必须要写的，如果想要添加自己的一些独有的属性的话就需要写构造函数，在构造函数中的this是指向实例对象的
+（2）类中的方法是在构造函数的原型对象上的，方法是适用于实例的(不仅仅适用于本身类实例化的对象，因为还可能继承)
+（3）在方法中的this，如果是实例对象直接调用的就是实例对象
 
 
 
